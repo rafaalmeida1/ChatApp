@@ -20,7 +20,7 @@ export default function Home() {
     const { register, handleSubmit, formState: { isSubmitting } } = useForm<FormInputs>();
 
     useEffect(() => {
-        const newSocket = io("http://172.16.10.208:3001");
+        const newSocket = io("https://accurate-sticky-valley.glitch.me");
         setSocket(newSocket);
 
         return () => {

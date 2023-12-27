@@ -2,16 +2,17 @@
     "version": 2,
     "builds": [
       {
-        "src": "server.js",
-        "use": "@now/node"
+        "src": "api/websocket.js",
+        "use": "@vercel/node"
       },
       {
         "src": "next.config.js",
-        "use": "@now/next"
+        "use": "@vercel/next"
       }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "/server.js" }
+      { "src": "/api/websocket", "dest": "api/websocket.js" },
+      { "src": "/(.*)", "dest": "next.config.js" }
     ]
   }
   
