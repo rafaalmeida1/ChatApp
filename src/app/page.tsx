@@ -20,7 +20,7 @@ export default function Home() {
     const { register, handleSubmit, formState: { isSubmitting } } = useForm<FormInputs>();
 
     useEffect(() => {
-        const newSocket = io("https://accurate-sticky-valley.glitch.me");
+        const newSocket = io("http://172.16.10.208:3001");
         setSocket(newSocket);
 
         return () => {
@@ -43,7 +43,7 @@ export default function Home() {
     };
 
     return (
-        <div className="from-cyan-500 flex items-center justify-center h-screen bg-gradient-to-r to-blue-500">
+        <div className="from-zinc-900 flex items-center justify-center h-screen bg-gradient-to-r to-zinc-950">
             <form
                 onSubmit={handleSubmit(onFormSubmit)}
                 className={`flex flex-col items-center bg-white rounded-lg p-6 shadow-lg gap-4 ${

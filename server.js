@@ -7,6 +7,10 @@ const app = express();
 const httpServer = http.createServer(app);
 app.use(cors({ origin: '*' }));
 
+app.get('/teste', (req, res) => { 
+  res.send('hello')
+})
+
 const io = new Server(httpServer, {
   cors: {
     origin: "*", // Ajuste para a origem apropriada em produção
