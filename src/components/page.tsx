@@ -6,7 +6,6 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import {
     Card,
     CardContent,
@@ -17,8 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { MessageSquareIcon } from "lucide-react";
+import { Avatar } from "./ui/avatar";
 
 interface IMsgDataTypes {
     roomId: string | number;
@@ -42,39 +40,46 @@ export const Chat: React.FC<ChatPageProps> = ({ socket, username, roomId }) => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    // Pedir permissão para notificações
     useEffect(() => {
-        // Carregar mensagens do localStorage
-        const savedMessages = localStorage.getItem(`chat-${roomId}`);
-        if (savedMessages) {
-            setChat(JSON.parse(savedMessages));
-        }
+        Notification.requestPermission();
+    }, []);
 
-        const receiveMsg = (data: IMsgDataTypes) => {
-            setChat((prev) => {
-                if (
-                    prev.some(
-                        (msg) =>
-                            msg.time === data.time && msg.user === data.user
-                    )
-                ) {
-                    // Evitar adicionar mensagens duplicadas
-                    return prev;
-                }
-                const updatedChat = [...prev, data];
-                localStorage.setItem(
-                    `chat-${roomId}`,
-                    JSON.stringify(updatedChat)
-                );
-                return updatedChat;
-            });
-        };
+    const receiveMsg = (data: IMsgDataTypes) => {
+        setChat((prev) => {
+            if (
+                prev.some(
+                    (msg) => msg.time === data.time && msg.user === data.user
+                )
+            ) {
+                return prev;
+            }
+            const updatedChat = [...prev, data];
+            localStorage.setItem(
+                `chat-${roomId}`,
+                JSON.stringify(updatedChat)
+            );
 
+            // Verificar se a mensagem não é do usuário atual e enviar notificação
+            if (data.user !== username && Notification.permission === "granted") {
+                new Notification(`Nova mensagem de ${data.user}`, {
+                    body: data.msg,
+                });
+            }
+
+            return updatedChat;
+        });
+    };
+
+    // Configurar ouvinte para mensagens recebidas
+    useEffect(() => {
         socket.on("receive_msg", receiveMsg);
 
+        // Limpar ouvinte ao desmontar
         return () => {
-            socket.off("receive_msg");
+            socket.off("receive_msg", receiveMsg);
         };
-    }, [socket, roomId]);
+    }, [socket, username]);
 
     useEffect(scrollToBottom, [chat]);
 
@@ -114,7 +119,7 @@ export const Chat: React.FC<ChatPageProps> = ({ socket, username, roomId }) => {
             </CardHeader>
             <CardContent>
                 <ScrollArea className="h-[600px] pr-4 w-full">
-                    {chat.map(({ roomId, user, msg, time }, key) => (
+                    {chat.map(({ user, msg, time }, key) => (
                         <div
                             key={key}
                             className={`flex items-start relative gap-2 mb-2 ${
@@ -149,11 +154,11 @@ export const Chat: React.FC<ChatPageProps> = ({ socket, username, roomId }) => {
                                 </span>
                             </div>
                             {user === username && (
-                                <span
+                                <Avatar
                                     className={`rounded-full border border-gray-300 flex justify-center items-center h-8 w-8 bg-gray-200 text-black`}
                                 >
                                     {user.charAt(0)}
-                                </span>
+                                </Avatar>
                             )}
                         </div>
                     ))}
